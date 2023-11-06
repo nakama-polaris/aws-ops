@@ -1,0 +1,14 @@
+[
+    {
+        "ParameterKey": "Product",
+        "ParameterValue": "aws"
+    },
+    {
+        "ParameterKey": "Environment",
+        "ParameterValue": "poc"
+    },
+    {
+        "ParameterKey": "Code",
+        "ParameterValue": "20100"
+    }
+]

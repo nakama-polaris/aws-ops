@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: |-
+  Audit bucket for AWS account
+
+Parameters:
+  Product:
+    Type: String
+    Default: "aws"
+    Description: "Product name"
+  Environment:
+    Type: String
+    Default: "poc"
+    Description: "Environment name"
+  Code:
+    Type: String
+    Default: "20010"
+    Description: "Code name"
+
+Resources:
+  AuditBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      # AccelerateConfiguration: 
+      #   AccelerateConfiguration
+      # AccessControl: String
+      # AnalyticsConfigurations: 
+      #   - AnalyticsConfiguration
+      ## SSE-S3にて暗号化
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              # KMSMasterKeyID: String
+              SSEAlgorithm: "AES256"
+            # BucketKeyEnabled: Boolean
+      ## [Replacement]
+      BucketName: !Sub "${Product}-${Environment}-${Code}-audit-bucket--${AWS::AccountId}"
+      # CorsConfiguration: 
+      #   CorsConfiguration
+      # IntelligentTieringConfigurations: 
+      #   - IntelligentTieringConfiguration
+      # InventoryConfigurations: 
+      #   - InventoryConfiguration
+      # LifecycleConfiguration: 
+      #   LifecycleConfiguration
+      # LoggingConfiguration: 
+      #   LoggingConfiguration
+      # MetricsConfigurations: 
+      #   - MetricsConfiguration
+      ## 基本的にイベントブリッジのみ有効化する
+      NotificationConfiguration: 
+        EventBridgeConfiguration: 
+          EventBridgeEnabled: true
+        # LambdaConfigurations: 
+        #   - LambdaConfiguration
+        # QueueConfigurations: 
+        #   - QueueConfiguration
+        # TopicConfigurations: 
+        #   - TopicConfiguration
+      # ObjectLockConfiguration: 
+      #   ObjectLockConfiguration
+      ## [Replacement]
+      ObjectLockEnabled: false
+      ## オブジェクトの所有者はバケットの所有者とする
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: "BucketOwnerEnforced"
+      ## パブリックアクセスはすべて禁止
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # ReplicationConfiguration: 
+      #   ReplicationConfiguration
+      Tags: 
+        - Key: "Product"
+          Value: !Ref Product
+        - Key: "Environment"
+          Value: !Ref Environment
+        - Key: "Code"
+          Value: !Ref Code
+      VersioningConfiguration:
+        Status: "Enabled"
+      # WebsiteConfiguration: 
+      #   WebsiteConfiguration
