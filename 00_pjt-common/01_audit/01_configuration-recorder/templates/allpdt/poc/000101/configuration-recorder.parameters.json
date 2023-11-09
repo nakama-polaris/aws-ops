@@ -12,11 +12,11 @@
         "ParameterValue": "000101"
     },
     {
-        "ParameterKey": "DeliveryChannelDestinationBucketNameWithoutAccountId",
-        "ParameterValue": "allpdt-poc-000100-audit-bucket"
-    },
-    {
         "ParameterKey": "KeyId",
         "ParameterValue": "bf1a3a28-b323-4f75-93e2-4a0c365e9e52"
+    },
+    {
+        "ParameterKey": "DeliveryFrequency",
+        "ParameterValue": "TwentyFour_Hours"
     }
 ]

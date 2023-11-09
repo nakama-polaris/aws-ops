@@ -124,3 +124,10 @@ Resources:
               StringEquals:
                 s3:x-amz-acl: "bucket-owner-full-control"
                 AWS:SourceAccount: !Ref "AWS::AccountId"
+
+Outputs:
+  AuditBucketName:
+    Description: "Audit bucket name"
+    Value: !Ref "AuditBucket"
+    Export:
+      Name: !Sub "${Product}-${Environment}-${Code}-audit-bucket-name--${AWS::AccountId}"
