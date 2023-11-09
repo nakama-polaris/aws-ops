@@ -55,6 +55,23 @@ Resources:
         - Key: "Code"
           Value: !Ref Code
 
+  ConfigurationRecorderRolePutS3Policy:
+    Type: "AWS::IAM::RolePolicy"
+    Properties:
+      PolicyName: !Sub "${Product}-${Environment}-${Code}-configuration-recorder-role-put-s3-policy--${AWS::Region}"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "s3:GetBucketAcl"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${DeliveryChannelDestinationBucketNameWithoutAccountId}--${AWS::AccountId}"
+          - Effect: "Allow"
+            Action:
+              - "s3:PutObject"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${DeliveryChannelDestinationBucketNameWithoutAccountId}--${AWS::AccountId}/config/*"
+      RoleName: !Ref "ConfigurationRecorderRole"
+
   ConfigurationRecorder:
     Type: "AWS::Config::ConfigurationRecorder"
     Properties:

@@ -101,7 +101,7 @@ Resources:
             Resource: !Sub "arn:${AWS::Partition}:s3:::${AuditBucket}"
             Condition:
               StringEquals:
-                "AWS:SourceAccount": !Ref "AWS::AccountId"
+                AWS:SourceAccount: !Ref "AWS::AccountId"
           - Sid: "AWSConfigBucketExistenceCheck"
             Effect: "Allow"
             Principal:
@@ -110,14 +110,14 @@ Resources:
             Resource: !Sub "arn:${AWS::Partition}:s3:::${AuditBucket}"
             Condition:
               StringEquals:
-                "AWS:SourceAccount": !Ref "AWS::AccountId"
+                AWS:SourceAccount: !Ref "AWS::AccountId"
           - Sid: "AWSConfigBucketDelivery"
             Effect: "Allow"
             Principal:
               Service: "config.amazonaws.com"
             Action: "s3:PutObject"
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${AuditBucket}"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${AuditBucket}/*"
             Condition:
               StringEquals:
-                "s3:x-amz-acl": "bucket-owner-full-control"
-                "AWS:SourceAccount": !Ref "AWS::AccountId"
+                s3:x-amz-acl: "bucket-owner-full-control"
+                AWS:SourceAccount: !Ref "AWS::AccountId"

@@ -2,13 +2,13 @@
 
 ## ユーザ設定値
 # プロダクト名
-export CFN_PRODUCT="aws"
+export CFN_PRODUCT="allpdt"
 # 環境名
 export CFN_ENVIRONMENT="$1"
 # 機能コード
-export CFN_CODE="20101"
+export CFN_CODE="000100"
 # テンプレートファイル名(拡張子抜き)
-export CFN_TEMPLATE_NAME="configuration-recorder"
+export CFN_TEMPLATE_NAME="audit-bucket"
 
 
 ## 自動設定値

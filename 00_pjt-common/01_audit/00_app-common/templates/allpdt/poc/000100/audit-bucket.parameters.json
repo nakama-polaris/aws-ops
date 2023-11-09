@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "Product",
-        "ParameterValue": "aws"
+        "ParameterValue": "allpdt"
     },
     {
         "ParameterKey": "Environment",
@@ -9,6 +9,6 @@
     },
     {
         "ParameterKey": "Code",
-        "ParameterValue": "20100"
+        "ParameterValue": "000100"
     }
 ]
