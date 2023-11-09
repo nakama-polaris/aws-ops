@@ -1,0 +1,22 @@
+[
+    {
+        "ParameterKey": "Product",
+        "ParameterValue": "aws"
+    },
+    {
+        "ParameterKey": "Environment",
+        "ParameterValue": "poc"
+    },
+    {
+        "ParameterKey": "Code",
+        "ParameterValue": "20101"
+    },
+    {
+        "ParameterKey": "DeliveryChannelDestinationBucketNameWithoutAccountId",
+        "ParameterValue": "aws-poc-20100-audit-bucket"
+    },
+    {
+        "ParameterKey": "KeyId",
+        "ParameterValue": "bf1a3a28-b323-4f75-93e2-4a0c365e9e52"
+    }
+]

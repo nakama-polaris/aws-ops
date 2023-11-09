@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: |-
+  ConfigRecorder for AWS account
+
+Parameters:
+  Product:
+    Type: String
+    Default: "aws"
+    Description: "Product name"
+  Environment:
+    Type: String
+    Default: "poc"
+    Description: "Environment name"
+  Code:
+    Type: String
+    Default: "20101"
+    Description: "Code name"
+  DeliveryChannelDestinationBucketNameWithoutAccountId:
+    Type: String
+    Description: "DeliveryChannel destination bucket name without account id"
+  KeyId:
+    Type: String
+    Description: "KMS Key ID"
+
+Resources:
+  ConfigurationRecorderRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "config.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Description: "Configuration Recorder Role"
+      ManagedPolicyArns: 
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWS_ConfigRole"
+      # MaxSessionDuration: Integer
+      ## [Replacement]
+      Path: "/"
+      # PermissionsBoundary: String
+      # Policies: 
+      #   - Policy
+      ## [Replacement]
+      RoleName: !Sub "${Product}-${Environment}-${Code}-configuration-recorder-role--${AWS::Region}"
+      Tags: 
+        - Key: "Product"
+          Value: !Ref Product
+        - Key: "Environment"
+          Value: !Ref Environment
+        - Key: "Code"
+          Value: !Ref Code
+
+  ConfigurationRecorder:
+    Type: "AWS::Config::ConfigurationRecorder"
+    Properties:
+      Name: !Sub "${Product}-${Environment}-${Code}-configuration-recorder--${AWS::Region}"
+      RecordingGroup: 
+        AllSupported: true
+        # ExclusionByResourceTypes: 
+        #   ExclusionByResourceTypes
+        IncludeGlobalResourceTypes: true
+        RecordingStrategy: 
+          UseOnly: "ALL_SUPPORTED_RESOURCE_TYPES"
+        # ResourceTypes: 
+        #   - String
+      RoleARN: !GetAtt ConfigurationRecorderRole.Arn
+
+  DeliveryChannel:
+    Type: "AWS::Config::DeliveryChannel"
+    Properties:
+      ConfigSnapshotDeliveryProperties:
+        DeliveryFrequency: "One_Hour"
+      ## [Replacement]
+      Name: !Sub "${Product}-${Environment}-${Code}-delivery-channel--${AWS::Region}"
+      S3BucketName: !Sub "${DeliveryChannelDestinationBucketNameWithoutAccountId}--${AWS::AccountId}"
+      ## 末尾の/は不要
+      S3KeyPrefix: "config/snapshot"
+      S3KmsKeyArn: !Sub "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/${KeyId}"
+      # SnsTopicARN: String 
