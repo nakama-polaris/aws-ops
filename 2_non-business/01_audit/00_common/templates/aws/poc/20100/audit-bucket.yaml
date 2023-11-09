@@ -84,3 +84,40 @@ Resources:
         Status: "Enabled"
       # WebsiteConfiguration: 
       #   WebsiteConfiguration
+
+  AuditBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      ## [Replacement]
+      Bucket: !Ref "AuditBucket"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "AWSConfigBucketPermissionsCheck"
+            Effect: "Allow"
+            Principal:
+              Service: "config.amazonaws.com"
+            Action: "s3:GetBucketAcl"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${AuditBucket}"
+            Condition:
+              StringEquals:
+                "AWS:SourceAccount": !Ref "AWS::AccountId"
+          - Sid: "AWSConfigBucketExistenceCheck"
+            Effect: "Allow"
+            Principal:
+              Service: "config.amazonaws.com"
+            Action: "s3:ListBucket"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${AuditBucket}"
+            Condition:
+              StringEquals:
+                "AWS:SourceAccount": !Ref "AWS::AccountId"
+          - Sid: "AWSConfigBucketDelivery"
+            Effect: "Allow"
+            Principal:
+              Service: "config.amazonaws.com"
+            Action: "s3:PutObject"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${AuditBucket}"
+            Condition:
+              StringEquals:
+                "s3:x-amz-acl": "bucket-owner-full-control"
+                "AWS:SourceAccount": !Ref "AWS::AccountId"
