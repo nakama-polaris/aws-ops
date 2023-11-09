@@ -103,3 +103,10 @@ Resources:
             Condition:
               StringEquals:
                 AWS:SourceAccount: !Ref "AWS::AccountId"
+
+Outputs:
+  S3AccessLogBucketName:
+    Description: "S3 Access Log bucket name"
+    Value: !Ref "S3AccessLogBucket"
+    Export:
+      Name: !Sub "${Product}-${Environment}-${Code}-s3-access-log-bucket-name--${AWS::AccountId}"
