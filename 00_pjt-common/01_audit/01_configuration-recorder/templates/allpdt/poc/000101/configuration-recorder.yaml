@@ -16,12 +16,22 @@ Parameters:
     Type: String
     Default: "000101"
     Description: "Code name"
-  DeliveryChannelDestinationBucketNameWithoutAccountId:
-    Type: String
-    Description: "DeliveryChannel destination bucket name without account id"
+  # DeliveryChannelDestinationBucketNameWithoutAccountId:
+  #   Type: String
+  #   Description: "DeliveryChannel destination bucket name without account id"
   KeyId:
     Type: String
     Description: "KMS Key ID"
+  DeliveryFrequency:
+    Type: String
+    Default: "TwentyFour_Hours"
+    Description: "Delivery frequency for Config Snapshot"
+    AllowedValues:
+      - "One_Hour"
+      - "Three_Hours"
+      - "Six_Hours"
+      - "Twelve_Hours"
+      - "TwentyFour_Hours"
 
 Resources:
   ConfigurationRecorderRole:
@@ -65,11 +75,20 @@ Resources:
           - Effect: "Allow"
             Action:
               - "s3:GetBucketAcl"
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${DeliveryChannelDestinationBucketNameWithoutAccountId}--${AWS::AccountId}"
+            Resource:
+              Fn::ImportValue:
+                !Sub "${Product}-${Environment}-000100-audit-bucket-arn--${AWS::AccountId}"
           - Effect: "Allow"
             Action:
               - "s3:PutObject"
-            Resource: !Sub "arn:${AWS::Partition}:s3:::${DeliveryChannelDestinationBucketNameWithoutAccountId}--${AWS::AccountId}/config/*"
+            Resource:
+              ## AuditBucketのconfig/*
+              ## 例) arn:aws:s3:::product-environment-000100-audit-bucket-name--123456789012/config/*
+              !Join 
+                - ""
+                - - Fn::ImportValue:
+                      !Sub "${Product}-${Environment}-000100-audit-bucket-arn--${AWS::AccountId}"
+                  - "/config/*"
       RoleName: !Ref "ConfigurationRecorderRole"
 
   ConfigurationRecorder:
@@ -91,10 +110,12 @@ Resources:
     Type: "AWS::Config::DeliveryChannel"
     Properties:
       ConfigSnapshotDeliveryProperties:
-        DeliveryFrequency: "One_Hour"
+        DeliveryFrequency: !Ref "DeliveryFrequency"
       ## [Replacement]
       Name: !Sub "${Product}-${Environment}-${Code}-delivery-channel--${AWS::Region}"
-      S3BucketName: !Sub "${DeliveryChannelDestinationBucketNameWithoutAccountId}--${AWS::AccountId}"
+      S3BucketName: 
+        Fn::ImportValue:
+          !Sub "${Product}-${Environment}-000100-audit-bucket-name--${AWS::AccountId}"
       ## 末尾の/は不要
       S3KeyPrefix: "config/snapshot"
       S3KmsKeyArn: !Sub "arn:${AWS::Partition}:kms:${AWS::Region}:${AWS::AccountId}:key/${KeyId}"
