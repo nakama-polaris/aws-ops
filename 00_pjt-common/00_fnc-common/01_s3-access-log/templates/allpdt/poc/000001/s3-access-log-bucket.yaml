@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: |-
+  S3 Access Log bucket for AWS account
+
+Parameters:
+  Product:
+    Type: String
+    Default: "allpdt"
+    Description: "Product name"
+  Environment:
+    Type: String
+    Default: "poc"
+    Description: "Environment name"
+  Code:
+    Type: String
+    Default: "000001"
+    Description: "Code name"
+
+Resources:
+  S3AccessLogBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      # AccelerateConfiguration: 
+      #   AccelerateConfiguration
+      # AccessControl: String
+      # AnalyticsConfigurations: 
+      #   - AnalyticsConfiguration
+      ## SSE-S3にて暗号化
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              # KMSMasterKeyID: String
+              SSEAlgorithm: "AES256"
+            # BucketKeyEnabled: Boolean
+      ## [Replacement]
+      BucketName: !Sub "${Product}-${Environment}-${Code}-s3-access-log-bucket--${AWS::AccountId}"
+      # CorsConfiguration: 
+      #   CorsConfiguration
+      # IntelligentTieringConfigurations: 
+      #   - IntelligentTieringConfiguration
+      # InventoryConfigurations: 
+      #   - InventoryConfiguration
+      # LifecycleConfiguration: 
+      #   LifecycleConfiguration
+      # LoggingConfiguration: 
+      #   LoggingConfiguration
+      # MetricsConfigurations: 
+      #   - MetricsConfiguration
+      ## 基本的にイベントブリッジのみ有効化する
+      NotificationConfiguration: 
+        EventBridgeConfiguration: 
+          EventBridgeEnabled: true
+        # LambdaConfigurations: 
+        #   - LambdaConfiguration
+        # QueueConfigurations: 
+        #   - QueueConfiguration
+        # TopicConfigurations: 
+        #   - TopicConfiguration
+      # ObjectLockConfiguration: 
+      #   ObjectLockConfiguration
+      ## [Replacement]
+      ObjectLockEnabled: false
+      ## オブジェクトの所有者はバケットの所有者とする
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: "BucketOwnerEnforced"
+      ## パブリックアクセスはすべて禁止
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      # ReplicationConfiguration: 
+      #   ReplicationConfiguration
+      Tags: 
+        - Key: "Product"
+          Value: !Ref Product
+        - Key: "Environment"
+          Value: !Ref Environment
+        - Key: "Code"
+          Value: !Ref Code
+      VersioningConfiguration:
+        Status: "Enabled"
+      # WebsiteConfiguration: 
+      #   WebsiteConfiguration
+
+  S3AccessLogBucketPolicy:
+    Type: "AWS::S3::BucketPolicy"
+    Properties:
+      ## [Replacement]
+      Bucket: !Ref "S3AccessLogBucket"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: "S3ServerAccessLogsPolicy"
+            Effect: "Allow"
+            Principal:
+              Service: "logging.s3.amazonaws.com"
+            Action:
+              - "s3:PutObject"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${S3AccessLogBucket}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceAccount: !Ref "AWS::AccountId"
