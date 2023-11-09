@@ -131,3 +131,8 @@ Outputs:
     Value: !Ref "AuditBucket"
     Export:
       Name: !Sub "${Product}-${Environment}-${Code}-audit-bucket-name--${AWS::AccountId}"
+  AuditBucketArn:
+    Description: "Audit bucket ARN"
+    Value: !GetAtt "AuditBucket.Arn"
+    Export:
+      Name: !Sub "${Product}-${Environment}-${Code}-audit-bucket-arn--${AWS::AccountId}"

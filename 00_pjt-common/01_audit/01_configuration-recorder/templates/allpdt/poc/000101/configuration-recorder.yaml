@@ -77,13 +77,18 @@ Resources:
               - "s3:GetBucketAcl"
             Resource:
               Fn::ImportValue:
-                !Sub "${Product}-${Environment}-000100-audit-bucket-name--${AWS::AccountId}"
+                !Sub "${Product}-${Environment}-000100-audit-bucket-arn--${AWS::AccountId}"
           - Effect: "Allow"
             Action:
               - "s3:PutObject"
             Resource:
-              Fn::ImportValue:
-                !Sub "${Product}-${Environment}-000100-audit-bucket-name--${AWS::AccountId}/config/*"
+              ## AuditBucketのconfig/*
+              ## 例) arn:aws:s3:::product-environment-000100-audit-bucket-name--123456789012/config/*
+              !Join 
+                - ""
+                - - Fn::ImportValue:
+                      !Sub "${Product}-${Environment}-000100-audit-bucket-arn--${AWS::AccountId}"
+                  - "/config/*"
       RoleName: !Ref "ConfigurationRecorderRole"
 
   ConfigurationRecorder:

@@ -16,7 +16,7 @@ source "$(git rev-parse --show-toplevel)/00_pjt-common/01_audit/01_configuration
 ## 変更セットの作成
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/01_audit/01_configuration-recorder/tools/0111_create_changeset.sh"
+bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0111_create_changeset.sh"
 ```
 
 ## 変更セットの確認
@@ -26,17 +26,17 @@ GUI
 ## 変更セットの実行
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/01_audit/01_configuration-recorder/tools/0112_execute_changeset.sh"
+bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0112_execute_changeset.sh"
 ```
 
 ## 変更セットの削除
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/01_audit/01_configuration-recorder/tools/0115_delete_changeset.sh"
+bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0115_delete_changeset.sh"
 ```
 
 ## スタックの削除
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/01_audit/01_configuration-recorder/tools/0191_delete_stack.sh"
+bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0191_delete_stack.sh"
 ```
