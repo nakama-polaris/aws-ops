@@ -43,8 +43,11 @@ Resources:
       #   - InventoryConfiguration
       # LifecycleConfiguration: 
       #   LifecycleConfiguration
-      # LoggingConfiguration: 
-      #   LoggingConfiguration
+      LoggingConfiguration: 
+        DestinationBucketName:
+          Fn::ImportValue:
+            !Sub "${Product}-${Environment}-000001-s3-access-log-bucket-name--${AWS::AccountId}"
+        LogFilePrefix: !Sub "${Product}-${Environment}-${Code}-audit-bucket--${AWS::AccountId}"
       # MetricsConfigurations: 
       #   - MetricsConfiguration
       ## 基本的にイベントブリッジのみ有効化する
