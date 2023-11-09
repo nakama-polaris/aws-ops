@@ -4,15 +4,61 @@
 
 AWSの実運用を想定したリポジトリ
 
+## 思想
+
+### 用語集
+
+#### Project
+
+プロジェクト
+
+#### Function
+
+プロジェクトスコープ内の機能  
+要求単位
+
+#### Application
+
+機能を実現するためのアプリケーション
+アプリケーション単位
+
+#### Product
+
+プロダクト(≠Project)
+
+#### Environment
+
+環境
+
+#### Code
+
+コード
+
+### ディレクトリの切り方
+
+- トップレベルからのパスは、 `XX_Project/YY_Function/ZZ_Application` を基本とする。
+- `XX`, `YY`, `ZZ` それぞれ `00` は `pjt-common`, `fnc-common`, `app-common` とする。
+
+### リソース配置の考え方
+
+特定のPJに所属する想定のリソースか？ -No-> `00_pjt-common` 
+↓ Yes
+特定の機能に所属する想定のリソースか？ -No-> `00_fnc-common`
+↓ Yes
+特定のアプリケーションに所属するリソースか？ -No-> `00_app-common`
+
 ## 構成
 
-### business
+### 00_pjt-common
 
-主にビジネス利用されるアプリケーションに関わるコンテンツを格納する
+全プロジェクト共通となる前提のコンテンツを格納する
+例)
+- Trailの設定
+- Costの確認
 
-### non-business
+### 01_sample-pjt
 
-主にビジネスに直接関わらないが、運用のために必要なコンテンツを格納する
+サンプルプロジェクトのコンテンツを格納する
 
 ### .devcontainer
 

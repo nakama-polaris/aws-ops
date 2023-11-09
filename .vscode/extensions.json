@@ -17,6 +17,7 @@
         "hediet.vscode-drawio",
         "yzhang.markdown-all-in-one",
         "codezombiech.gitignore",
-        "github.copilot"
+        "github.copilot",
+        "christian-kohler.path-intellisense"
     ]
 }

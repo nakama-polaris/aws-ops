@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "Product",
-        "ParameterValue": "aws"
+        "ParameterValue": "allpdt"
     },
     {
         "ParameterKey": "Environment",
@@ -9,11 +9,11 @@
     },
     {
         "ParameterKey": "Code",
-        "ParameterValue": "20101"
+        "ParameterValue": "000101"
     },
     {
         "ParameterKey": "DeliveryChannelDestinationBucketNameWithoutAccountId",
-        "ParameterValue": "aws-poc-20100-audit-bucket"
+        "ParameterValue": "allpdt-poc-000100-audit-bucket"
     },
     {
         "ParameterKey": "KeyId",
