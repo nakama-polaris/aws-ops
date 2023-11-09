@@ -14,7 +14,7 @@ Parameters:
     Description: "Environment name"
   Code:
     Type: String
-    Default: "20101"
+    Default: "000101"
     Description: "Code name"
   DeliveryChannelDestinationBucketNameWithoutAccountId:
     Type: String

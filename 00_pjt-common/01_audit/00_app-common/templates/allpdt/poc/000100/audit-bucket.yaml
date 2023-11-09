@@ -6,7 +6,7 @@ Description: |-
 Parameters:
   Product:
     Type: String
-    Default: "aws"
+    Default: "allpdt"
     Description: "Product name"
   Environment:
     Type: String
@@ -14,7 +14,7 @@ Parameters:
     Description: "Environment name"
   Code:
     Type: String
-    Default: "20010"
+    Default: "000100"
     Description: "Code name"
 
 Resources:
