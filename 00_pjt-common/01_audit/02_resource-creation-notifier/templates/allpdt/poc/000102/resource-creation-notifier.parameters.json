@@ -1,0 +1,22 @@
+[
+    {
+        "ParameterKey": "Product",
+        "ParameterValue": "allpdt"
+    },
+    {
+        "ParameterKey": "Environment",
+        "ParameterValue": "poc"
+    },
+    {
+        "ParameterKey": "Code",
+        "ParameterValue": "000102"
+    },
+    {
+        "ParameterKey": "SlackWorkspaceId",
+        "ParameterValue": "T05TWGZV8M9"
+    },
+    {
+        "ParameterKey": "SlackChannelId",
+        "ParameterValue": "C064XV5SANS"
+    }
+]

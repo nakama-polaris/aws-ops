@@ -1,0 +1,264 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: |-
+  Resource creation notifier for AWS account
+
+Parameters:
+  Product:
+    Type: String
+    Default: "allpdt"
+    Description: "Product name"
+  Environment:
+    Type: String
+    Default: "poc"
+    Description: "Environment name"
+  Code:
+    Type: String
+    Default: "000102"
+    Description: "Code name"
+  SlackWorkspaceId:
+    Type: String
+    Description: "Slack workspace ID"
+    NoEcho: true
+  SlackChannelId:
+    Type: String
+    Description: "Slack channel ID"
+    NoEcho: true
+
+Resources:
+  RuleRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "events.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Description: "Resource Creation Notifier Rule Role"
+      # ManagedPolicyArns:
+      #   - String
+      # MaxSessionDuration: Integer
+      ## [Replacement]
+      Path: "/"
+      # PermissionsBoundary: String
+      # Policies:
+      #   - Policy
+      ## [Replacement]
+      RoleName: !Sub "${Product}-${Environment}-${Code}-rule-role--${AWS::Region}"
+      Tags:
+        - Key: "Product"
+          Value: !Ref "Product"
+        - Key: "Environment"
+          Value: !Ref "Environment"
+        - Key: "Code"
+          Value: !Ref "Code"
+
+  RuleRoleSnsPublishPolicy:
+    Type: "AWS::IAM::RolePolicy"
+    Properties:
+      ## [Replacement]
+      PolicyName: !Sub "${Product}-${Environment}-${Code}-rule-role-sns-publish-policy--${AWS::Region}"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - "sns:Publish"
+            Resource: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+      ## [Replacement]
+      RoleName: !Ref "RuleRole"
+
+  ResourceCreationNotifierRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Description: "Catch resource creation event and notify to SNS"
+      EventBusName: "default"
+      EventPattern:
+        source:
+          - "aws.config"
+        detail-type:
+          - "Config Configuration Item Change"
+        detail:
+          configurationItemDiff:
+            changeType:
+              - "CREATE"
+      ## [Replacement]
+      Name: !Sub "${Product}-${Environment}-${Code}-resource-creation-notifier-rule"
+      RoleArn: !GetAtt "RuleRole.Arn"
+      # ScheduleExpression: String
+      State: "ENABLED"
+      Targets:
+      - Arn: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+        # BatchParameters:
+        #   BatchParameters
+        # DeadLetterConfig:
+        #   DeadLetterConfig
+        # EcsParameters:
+        #   EcsParameters
+        # HttpParameters:
+        #   HttpParameters
+        Id: !Sub "${Product}-${Environment}-${Code}-resource-creation-notifier-topic"
+        # Input: String
+        # InputPath: String
+        # InputTransformer:
+        #   InputTransformer
+        # KinesisParameters:
+        #   KinesisParameters
+        # RedshiftDataParameters:
+        #   RedshiftDataParameters
+        RetryPolicy:
+          MaximumEventAgeInSeconds: 86400
+          MaximumRetryAttempts: 185
+        # RoleArn: String
+        # RunCommandParameters:
+        #   RunCommandParameters
+        # SageMakerPipelineParameters:
+        #   SageMakerPipelineParameters
+        # SqsParameters:
+        #   SqsParameters
+
+  ResourceCreationNotifierArchive:
+    Type: "AWS::Events::Archive"
+    Properties:
+      ## [Replacement]
+      ArchiveName: !Sub "${Product}-${Environment}-${Code}-event-archive"
+      Description: "Event archive for resource creation notifier"
+      EventPattern:
+        source:
+          - "aws.config"
+        detail-type:
+          - "Config Configuration Item Change"
+        detail:
+          configurationItemDiff:
+            changeType:
+              - "CREATE"
+      RetentionDays: 30
+      ## [Replacement]
+      SourceArn: !Sub "arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:event-bus/default"
+
+
+  ResourceCreationNotifierTopic:
+    Type: "AWS::SNS::Topic"
+    Properties:
+      # ArchivePolicy: Json
+      ## FIFOトピック専用プロパティなので指定しない
+      # ContentBasedDeduplication: Boolean
+      # DataProtectionPolicy: Json
+      DisplayName: !Sub "${Product}-${Environment}-${Code} Resource Creation Notifier Topic"
+      ## [Replacement]
+      FifoTopic: false
+      # KmsMasterKeyId: String
+      ## SHA256を指定する
+      SignatureVersion: "2"
+      ## サブスクリプションはAWS::SNS::Subscriptionリソースで作成する
+      # Subscription:
+      #   - Subscription
+      Tags:
+        - Key: "Product"
+          Value: !Ref "Product"
+        - Key: "Environment"
+          Value: !Ref "Environment"
+        - Key: "Code"
+          Value: !Ref "Code"
+      ## [Replacement]
+      TopicName: !Sub "${Product}-${Environment}-${Code}-resource-creation-notifier-topic"
+      TracingConfig: "PassThrough"
+
+  ChatbotRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "chatbot.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Description: "Chatbot Slack Channel Configuration Role"
+      # ManagedPolicyArns:
+      #   - String
+      # MaxSessionDuration: Integer
+      ## [Replacement]
+      Path: "/"
+      # PermissionsBoundary: String
+      # Policies:
+      #   - Policy
+      ## [Replacement]
+      RoleName: !Sub "${Product}-${Environment}-${Code}-chatbot-role--${AWS::Region}"
+      Tags:
+        - Key: "Product"
+          Value: !Ref "Product"
+        - Key: "Environment"
+          Value: !Ref "Environment"
+        - Key: "Code"
+          Value: !Ref "Code"
+
+  ChatbotRoleSnsSubscribePolicy:
+    Type: "AWS::IAM::RolePolicy"
+    Properties:
+      ## [Replacement]
+      PolicyName: !Sub "${Product}-${Environment}-${Code}-chatbot-role-sns-subscribe-policy--${AWS::Region}"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - "sns:ListSubscriptionsByTopic"
+              - "sns:ListTopics"
+              - "sns:Unsubscribe"
+              - "sns:Subscribe"
+              - "sns:ListSubscriptions"
+            Effect: "Allow"
+            Resource: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+            Sid: "ChatbotCanSubscribeSns"
+          - Action:
+              - "logs:PutLogEvents"
+              - "logs:CreateLogStream"
+              - "logs:DescribeLogStreams"
+              - "logs:CreateLogGroup"
+              - "logs:DescribeLogGroups"
+            Effect: "Allow"
+            ## TODO 絞る
+            Resource: "*"
+            # Resource: !GetAtt "ChatbotSlackChannelConfigurationLogGroup.Arn"
+            Sid: "ChatbotCanPutLogs"
+      ## [Replacement]
+      RoleName: !Ref "ChatbotRole"
+
+  ## TODO us-east-1に作成する必要があるので要検討
+  # ChatbotSlackChannelConfigurationLogGroup:
+  #   Type: "AWS::Logs::LogGroup"
+  #   Properties:
+  #     # DataProtectionPolicy: Json
+  #     # KmsKeyId: String
+  #     ## [Replacement]
+  #     LogGroupName: !Sub "/aws/chatbot/${Product}-${Environment}-${Code}-chatbot-slack-channel-configuration-loggroup"
+  #     RetentionInDays: 30
+  #     Tags:
+  #       - Key: "Product"
+  #         Value: !Ref "Product"
+  #       - Key: "Environment"
+  #         Value: !Ref "Environment"
+  #       - Key: "Code"
+  #         Value: !Ref "Code"
+
+  ChatbotSlackChannelConfiguration:
+    Type: "AWS::Chatbot::SlackChannelConfiguration"
+    Properties:
+      ## [Replacement]
+      ConfigurationName: !Sub "${Product}-${Environment}-${Code}-chatbot-slack-channel-configuration"
+      # GuardrailPolicies:
+      #   - String
+      IamRoleArn: !GetAtt "ChatbotRole.Arn"
+      LoggingLevel: "INFO"
+      ## [Replacement]
+      SlackChannelId: !Ref "SlackChannelId"
+      SlackWorkspaceId: !Ref "SlackWorkspaceId"
+      SnsTopicArns:
+        - !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+      UserRoleRequired: false
