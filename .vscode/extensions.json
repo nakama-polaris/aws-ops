@@ -18,6 +18,7 @@
         "yzhang.markdown-all-in-one",
         "codezombiech.gitignore",
         "github.copilot",
-        "christian-kohler.path-intellisense"
+        "christian-kohler.path-intellisense",
+        "fabiospampinato.vscode-diff"
     ]
 }

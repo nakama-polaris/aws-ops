@@ -57,11 +57,11 @@ Resources:
         - Key: "Code"
           Value: !Ref "Code"
 
-  RuleRoleSnsPublishPolicy:
+  RuleRolePolicy:
     Type: "AWS::IAM::RolePolicy"
     Properties:
       ## [Replacement]
-      PolicyName: !Sub "${Product}-${Environment}-${Code}-rule-role-sns-publish-policy--${AWS::Region}"
+      PolicyName: !Sub "${Product}-${Environment}-${Code}-rule-role-policy--${AWS::Region}"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -69,6 +69,14 @@ Resources:
             Action:
               - "sns:Publish"
             Resource: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+            Sid: "AllowSnsPublish"
+          - Effect: "Allow"
+            Action:
+              - "logs:CreateLogGroup"
+              - "logs:CreateLogStream"
+              - "logs:PutLogEvents"
+            Resource: "*"
+            Sid: "AllowCloudWatchLogs"
       ## [Replacement]
       RoleName: !Ref "RuleRole"
 
@@ -92,54 +100,141 @@ Resources:
       # ScheduleExpression: String
       State: "ENABLED"
       Targets:
-      - Arn: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
-        # BatchParameters:
-        #   BatchParameters
-        # DeadLetterConfig:
-        #   DeadLetterConfig
-        # EcsParameters:
-        #   EcsParameters
-        # HttpParameters:
-        #   HttpParameters
-        Id: !Sub "${Product}-${Environment}-${Code}-resource-creation-notifier-topic"
-        # Input: String
-        # InputPath: String
-        # InputTransformer:
-        #   InputTransformer
-        # KinesisParameters:
-        #   KinesisParameters
-        # RedshiftDataParameters:
-        #   RedshiftDataParameters
-        RetryPolicy:
-          MaximumEventAgeInSeconds: 86400
-          MaximumRetryAttempts: 185
-        # RoleArn: String
-        # RunCommandParameters:
-        #   RunCommandParameters
-        # SageMakerPipelineParameters:
-        #   SageMakerPipelineParameters
-        # SqsParameters:
-        #   SqsParameters
+        # - Arn: "arn:aws:sns:ap-northeast-1:785529158198:test-nfr-poc-resource-creation-notification-topic"
+        - Arn: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+          # BatchParameters:
+          #   BatchParameters
+          DeadLetterConfig:
+            Arn: !GetAtt "ResourceCreationNotifierRuleDeadLetterQueue.Arn"
+          # EcsParameters:
+          #   EcsParameters
+          # HttpParameters:
+          #   HttpParameters
+          Id: !Sub "${Product}-${Environment}-${Code}-resource-creation-notifier-topic"
+          # Input: String
+          # InputPath: String
+          # InputTransformer:
+          #   InputTransformer
+          # KinesisParameters:
+          #   KinesisParameters
+          # RedshiftDataParameters:
+          #   RedshiftDataParameters
+          RetryPolicy:
+            MaximumEventAgeInSeconds: 86400
+            MaximumRetryAttempts: 185
+          # RoleArn: String
+          # RunCommandParameters:
+          #   RunCommandParameters
+          # SageMakerPipelineParameters:
+          #   SageMakerPipelineParameters
+          # SqsParameters:
+          #   SqsParameters
+        - Id: Id274d5669-18f0-4584-9e81-317a15c05389
+          Arn: >-
+            arn:aws:logs:ap-northeast-1:785529158198:log-group:/aws/events/event-test
 
-  ResourceCreationNotifierArchive:
-    Type: "AWS::Events::Archive"
+  ResourceCreationNotifierRuleDeadLetterQueue:
+    Type: "AWS::SQS::Queue"
     Properties:
-      ## [Replacement]
-      ArchiveName: !Sub "${Product}-${Environment}-${Code}-event-archive"
-      Description: "Event archive for resource creation notifier"
-      EventPattern:
-        source:
-          - "aws.config"
-        detail-type:
-          - "Config Configuration Item Change"
-        detail:
-          configurationItemDiff:
-            changeType:
-              - "CREATE"
-      RetentionDays: 30
-      ## [Replacement]
-      SourceArn: !Sub "arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:event-bus/default"
+      ## FIFOキューの設定値のため不要
+      # ContentBasedDeduplication: Boolean
+      ## FIFOキューの設定値のため不要
+      # DeduplicationScope: String
+      ## デフォルト値に設定
+      DelaySeconds: 0
+      ## [Replacement] falseを設定するとエラーになるため意図的な未設定で対応
+      # FifoQueue: false
+      # FifoThroughputLimit: String
+      # KmsDataKeyReusePeriodSeconds: Integer
+      # KmsMasterKeyId: String
+      ## デフォルト値262,144 (256 KiB).に設定
+      MaximumMessageSize: 262144
+      ## デフォルト値1,209,600 seconds (14 days)に設定
+      MessageRetentionPeriod: 1209600
+      QueueName: !Sub "${Product}-${Environment}-${Code}-rule-dead-letter-queue"
+      ReceiveMessageWaitTimeSeconds: 0
+      # RedriveAllowPolicy: Json
+      # RedrivePolicy: Json
+      SqsManagedSseEnabled: false
+      Tags:
+        - Key: "Product"
+          Value: !Ref "Product"
+        - Key: "Environment"
+          Value: !Ref "Environment"
+        - Key: "Code"
+          Value: !Ref "Code"
+      VisibilityTimeout: 30
 
+  ## TODO 検証用に広い権限を与える　あとで消す
+  # ResourceCreationNotifierRuleDeadLetterQueuePolicy:
+  #   Type: "AWS::SQS::QueuePolicy"
+  #   Properties:
+  #     PolicyDocument:
+  #       Statement:
+  #         - Sid: "__owner_statement"
+  #           Effect: "Allow"
+  #           ## TODO UI上でエラーを出さないための設定
+  #           Principal: "*"
+  #             # AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+  #           Action: "sqs:*"
+  #           Resource: !GetAtt "ResourceCreationNotifierRuleDeadLetterQueue.Arn"
+  #     Queues:
+  #       - !Ref "ResourceCreationNotifierRuleDeadLetterQueue"
+
+  ## TODO復活させる
+  ResourceCreationNotifierRuleDeadLetterQueuePolicy:
+    Type: "AWS::SQS::QueuePolicy"
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Sid: "__owner_statement"
+            Effect: "Allow"
+            Principal:
+              AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
+            Action: "sqs:*"
+            Resource: !GetAtt "ResourceCreationNotifierRuleDeadLetterQueue.Arn"
+          - Sid: "Dead-letter queue permissions for EventBridge"
+            Effect: "Allow"
+            ## SNS サブスクリプションのUI上でエラーを出さないために、Principalは 'AWS: "*"'にしてConditionでアクセス元を絞る
+            Principal:
+              AWS: "*"
+            Action: "sqs:SendMessage"
+            Resource: !GetAtt "ResourceCreationNotifierRuleDeadLetterQueue.Arn"
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !GetAtt "ResourceCreationNotifierRule.Arn"
+          - Sid: "Dead-letter queue permissions for SNS"
+            Effect: "Allow"
+            ## SNS サブスクリプションのUI上でエラーを出さないために、Principalは 'AWS: "*"'にしてConditionでアクセス元を絞る
+            Principal:
+              AWS: "*"
+            Action: "sqs:SendMessage"
+            Resource: !GetAtt "ResourceCreationNotifierRuleDeadLetterQueue.Arn"
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+      Queues:
+        - !Ref "ResourceCreationNotifierRuleDeadLetterQueue"
+
+  ## TODO 溜まったイベントが見られるわけではないので削除
+  # ResourceCreationNotifierArchive:
+  #   Type: "AWS::Events::Archive"
+  #   Properties:
+  #     ## [Replacement]
+  #     ArchiveName: !Sub "${Product}-${Environment}-${Code}-event-archive"
+  #     Description: "Event archive for resource creation notifier"
+  #     EventPattern:
+  #       source:
+  #         - "aws.config"
+  #       detail-type:
+  #         - "Config Configuration Item Change"
+  #       detail:
+  #         configurationItemDiff:
+  #           changeType:
+  #             - "CREATE"
+  #     RetentionDays: 30
+  #     ## [Replacement]
+  #     SourceArn: !Sub "arn:${AWS::Partition}:events:${AWS::Region}:${AWS::AccountId}:event-bus/default"
 
   ResourceCreationNotifierTopic:
     Type: "AWS::SNS::Topic"
@@ -152,8 +247,8 @@ Resources:
       ## [Replacement]
       FifoTopic: false
       # KmsMasterKeyId: String
-      ## SHA256を指定する
-      SignatureVersion: "2"
+      ## Chatbotのサブスクリプションを有効にするためにバージョン1指定が必要
+      SignatureVersion: "1"
       ## サブスクリプションはAWS::SNS::Subscriptionリソースで作成する
       # Subscription:
       #   - Subscription
@@ -168,6 +263,58 @@ Resources:
       TopicName: !Sub "${Product}-${Environment}-${Code}-resource-creation-notifier-topic"
       TracingConfig: "PassThrough"
 
+  ResourceCreationNotifierTopicPolicy:
+    Type: "AWS::SNS::TopicPolicy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Id: "__default_policy_ID"
+        Statement:
+          - Sid: "__default_statement_ID"
+            Effect: "Allow"
+            Principal:
+              AWS: "*"
+            Action:
+              - "sns:GetTopicAttributes"
+              - "sns:SetTopicAttributes"
+              - "sns:AddPermission"
+              - "sns:RemovePermission"
+              - "sns:DeleteTopic"
+              - "sns:Subscribe"
+              - "sns:ListSubscriptionsByTopic"
+              - "sns:Publish"
+              - "sns:Receive"
+            Resource: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+            Condition:
+              StringEquals:
+                AWS:SourceOwner: !Ref "AWS::AccountId"
+          - Sid: "AllowSnsPublish"
+            Effect: "Allow"
+            Principal:
+              Service: "events.amazonaws.com"
+            Action: "sns:Publish"
+            Resource: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !GetAtt "ResourceCreationNotifierRule.Arn"
+      Topics:
+        - !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+
+  ResourceCreationNotifierTopicSubscription:
+    Type: "AWS::SNS::Subscription"
+    Properties:
+      # DeliveryPolicy: Json
+      Endpoint: "https://global.sns-api.chatbot.amazonaws.com"
+      # FilterPolicy: Json
+      # FilterPolicyScope: String
+      Protocol: "https"
+      RawMessageDelivery: false
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt "ResourceCreationNotifierRuleDeadLetterQueue.Arn"
+      Region: !Ref "AWS::Region"
+      # SubscriptionRoleArn: String
+      TopicArn: !GetAtt "ResourceCreationNotifierTopic.TopicArn"
+
   ChatbotRole:
     Type: "AWS::IAM::Role"
     Properties:
@@ -181,8 +328,8 @@ Resources:
             Action:
               - "sts:AssumeRole"
       Description: "Chatbot Slack Channel Configuration Role"
-      # ManagedPolicyArns:
-      #   - String
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSResourceExplorerReadOnlyAccess"
       # MaxSessionDuration: Integer
       ## [Replacement]
       Path: "/"
@@ -199,11 +346,11 @@ Resources:
         - Key: "Code"
           Value: !Ref "Code"
 
-  ChatbotRoleSnsSubscribePolicy:
+  ChatbotRolePolicy:
     Type: "AWS::IAM::RolePolicy"
     Properties:
       ## [Replacement]
-      PolicyName: !Sub "${Product}-${Environment}-${Code}-chatbot-role-sns-subscribe-policy--${AWS::Region}"
+      PolicyName: !Sub "${Product}-${Environment}-${Code}-chatbot-role-policy--${AWS::Region}"
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -227,6 +374,14 @@ Resources:
             Resource: "*"
             # Resource: !GetAtt "ChatbotSlackChannelConfigurationLogGroup.Arn"
             Sid: "ChatbotCanPutLogs"
+          - Action:
+              - "cloudwatch:Describe*"
+              - "cloudwatch:Get*"
+              - "cloudwatch:List*"
+              - "cloudwatch:*"
+            Effect: "Allow"
+            Resource: "*"
+            Sid: "ChatbotCanReadNotification"
       ## [Replacement]
       RoleName: !Ref "ChatbotRole"
 
@@ -252,8 +407,9 @@ Resources:
     Properties:
       ## [Replacement]
       ConfigurationName: !Sub "${Product}-${Environment}-${Code}-chatbot-slack-channel-configuration"
-      # GuardrailPolicies:
-      #   - String
+      GuardrailPolicies:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/ReadOnlyAccess"
+        - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/service-role/AWS-Chatbot-NotificationsOnly-Policy-12b6c390-7214-41a7-9a36-ebbb6a866ab6"
       IamRoleArn: !GetAtt "ChatbotRole.Arn"
       LoggingLevel: "INFO"
       ## [Replacement]

@@ -13,10 +13,10 @@
     },
     {
         "ParameterKey": "SlackWorkspaceId",
-        "ParameterValue": "T05TWGZV8M9"
+        "ParameterValue": "****"
     },
     {
         "ParameterKey": "SlackChannelId",
-        "ParameterValue": "C064XV5SANS"
+        "ParameterValue": "****"
     }
 ]

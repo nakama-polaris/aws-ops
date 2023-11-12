@@ -4,7 +4,7 @@
 
 ```bash
 # 環境変数の設定(共通)
-source "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0100_general_setup.sh"
+source "$(git rev-parse --show-toplevel)/scripts/0100_general_setup.sh"
 
 # 環境名の設定
 export ENV=
@@ -16,7 +16,7 @@ source "$(git rev-parse --show-toplevel)/00_pjt-common/01_audit/02_resource-crea
 ## 変更セットの作成
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0111_create_changeset.sh"
+bash "$(git rev-parse --show-toplevel)/scripts/0111_create_changeset.sh"
 ```
 
 ## 変更セットの確認
@@ -26,17 +26,17 @@ GUI
 ## 変更セットの実行
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0112_execute_changeset.sh"
+bash "$(git rev-parse --show-toplevel)/scripts/0112_execute_changeset.sh"
 ```
 
 ## 変更セットの削除
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0115_delete_changeset.sh"
+bash "$(git rev-parse --show-toplevel)/scripts/0115_delete_changeset.sh"
 ```
 
 ## スタックの削除
 
 ```bash
-bash "$(git rev-parse --show-toplevel)/00_pjt-common/tools/0191_delete_stack.sh"
+bash "$(git rev-parse --show-toplevel)/scripts/0191_delete_stack.sh"
 ```

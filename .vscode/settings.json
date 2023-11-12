@@ -1,0 +1,23 @@
+{
+    "[yaml]": {
+        "editor.insertSpaces": true,
+        "editor.tabSize": 2,
+        "editor.indentSize": 2,
+        "editor.autoIndent": "keep",
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.quickSuggestions": {
+            "other": true,
+            "comments": false,
+            "strings": true
+        }
+    },
+    "cfnLint.validateUsingJsonSchema": true,
+    "files.trimTrailingWhitespace": true,
+    "hediet.vscode-drawio.customLibraries": [
+        {
+            "entryId": "simple-icons-drawio",
+            "libName": "simple-icons-drawio",
+            "url": "https://raw.githubusercontent.com/mondeja/simple-icons-drawio/develop/simple-icons.xml"
+        }
+    ],
+}
